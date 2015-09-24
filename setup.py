@@ -22,6 +22,7 @@ import ez_setup
 ez_setup.use_setuptools()
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
+from Cython.Build import cythonize
 
 
 # the following code is adapted from tornado's setup.py:
@@ -113,14 +114,18 @@ setup(
     description='Python framework for fast Vector Space Modelling',
     long_description=readfile('README.rst'),
 
-    ext_modules=[
+    ext_modules=cythonize([
         Extension('gensim.models.word2vec_inner',
             sources=['./gensim/models/word2vec_inner.c'],
             include_dirs=[model_dir]),
         Extension('gensim.models.doc2vec_inner',
             sources=['./gensim/models/doc2vec_inner.c'],
             include_dirs=[model_dir]),
-    ],
+        Extension('gensim.models.csparselda',
+            sources=['./gensim/models/csparselda.pyx', './gensim/models/sparselda.c'],
+            extra_compile_args=['-std=c99'],
+            include_dirs=[model_dir]),
+    ]),
     cmdclass={'build_ext': custom_build_ext},
     packages=find_packages(),
 
